@@ -16,7 +16,7 @@ Entorno urbano 3D inspirado en una manzana latina de Bogotá, Colombia, desarrol
 ---
 
 ## 🛠️ Tecnologías utilizadas
-
+ 
 | Herramienta | Uso |
 |---|---|
 | **Blender 4.4** | Modelado, UV mapping y preparación de la escena |
@@ -25,32 +25,64 @@ Entorno urbano 3D inspirado en una manzana latina de Bogotá, Colombia, desarrol
 | **Python (bpy)** | Scripts de automatización dentro de Blender |
 | **Unity 6 (URP)** | Motor de videojuego para VR |
 | **Meta Quest 2/3** | Plataforma objetivo de VR |
-
+ 
 ---
-
-## 🗺️ Generación del entorno
-
-El entorno urbano fue generado usando el addon **BlenderGIS**, que importa datos reales de OpenStreetMap directamente en Blender.
-
-### Capas generadas por BlenderGIS
-
+ 
+## 🗺️ Generación del entorno con BlenderGIS
+ 
+### ¿Qué es BlenderGIS?
+ 
+[BlenderGIS](https://github.com/domlysz/BlenderGIS) es un addon gratuito para Blender que permite importar datos geográficos reales directamente en la escena 3D. Soporta fuentes como OpenStreetMap, modelos de elevación digital (DEM), imágenes satelitales y sistemas de coordenadas geográficas (CRS).
+ 
+### Instalación
+ 
+1. Descargar el addon desde el repositorio oficial de GitHub
+2. En Blender: `Edit → Preferences → Add-ons → Install`
+3. Seleccionar el archivo `.zip` descargado
+4. Activar **BlenderGIS** en la lista de addons
+5. Aparece una pestaña **GIS** en la barra de menú superior del viewport
+### Configuración del proyecto
+ 
+El entorno fue generado a partir de coordenadas GPS reales de la zona de **Teusaquillo, Bogotá, Colombia**, específicamente sobre la **Carrera 49**. Esta zona fue elegida por su morfología urbana representativa de manzana latina: casas continuas pegadas, locales comerciales en planta baja y arquitectura republicana mezclada con construcción moderna.
+ 
+### Proceso de importación
+ 
+1. En Blender abrir la pestaña **GIS** → `Import → OpenStreetMap`
+2. Ingresar las coordenadas GPS del área de interés (Teusaquillo, Carrera 49)
+3. Definir el radio de importación en metros
+4. BlenderGIS descarga automáticamente los datos OSM y genera:
+   - **Edificios** → extruidos desde las huellas de polígonos OSM con altura estimada
+   - **Carreteras** → generadas como meshes planos con perfiles por tipo de vía
+   - **Aceras y caminos peatonales** → como curvas o meshes separados
+### Capas generadas automáticamente
+ 
 - `map.osm` — Capa principal del mapa
-- `map_2.osm` — Edificios extruidos automáticamente desde huellas OSM
+- `map_2.osm` — Edificios extruidos automáticamente desde huellas OSM (161 objetos)
 - `map_3.osm`, `map_4.osm`, `map_7.osm` — Capas adicionales de vías y perfiles urbanos
-- `way_profiles` — Perfiles de carreteras (residencial, servicio, terciaria, ferroviaria, peatonal)
-
+- `way_profiles` — Perfiles de carreteras clasificados por tipo:
+  - `profile_roads_residential` — Vías residenciales
+  - `profile_roads_service` — Vías de servicio
+  - `profile_roads_tertiary` — Vías terciarias
+  - `profile_paths_footway` — Caminos peatonales
+  - `profile_railways` — Vías férreas
+### Ajustes manuales post-generación
+ 
+Aunque BlenderGIS automatiza la generación, algunos edificios requirieron corrección manual debido a limitaciones de los datos OSM:
+ 
+- Edificios con polígonos de huella mal definidos en OSM → geometría de techo incorrecta, descartados y reemplazados
+- Reposicionamiento de algunos edificios que quedaron desplazados respecto a las vías
 ### Proceso de limpieza de geometría OSM
-
+ 
 Los edificios generados automáticamente presentan problemas comunes que fueron corregidos manualmente y por script:
-
+ 
 - **Normales invertidas** → corregidas con `Mesh → Normals → Recalculate Outside` (Shift+N)
 - **Geometría corrupta** → edificios con formas no convexas descartados y reemplazados
 - **Caras de fondo innecesarias** → eliminadas para reducir el conteo de triángulos
-
+- **Z-fighting en carreteras** → elevación de 0.02m en el mesh de carreteras para evitar flickering en VR
 ---
-
+ 
 ## 🏗️ Pipeline de construcción del entorno
-
+ 
 ```
 OpenStreetMap → BlenderGIS → Limpieza de geometría → 
 Agrupación aleatoria → UV Mapping → Atlas de texturas → 
